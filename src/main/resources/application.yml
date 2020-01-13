@@ -1,0 +1,8 @@
+
+# DEBUG JPA/SQL
+spring:
+  jpa:
+    show-sql: true
+ 
+#logging.level.org.hibernate.SQL: DEBUG
+#logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE

@@ -1,0 +1,95 @@
+{
+	"variables": [],
+	"info": {
+		"name": "leisure-nexus",
+		"_postman_id": "0f057e68-c856-32b3-10aa-562e0a4a7b46",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "List users",
+			"request": {
+				"url": "http://localhost:8080/users",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save user (create/update)",
+			"request": {
+				"url": "http://localhost:8080/users",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\":\"tim\"}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Interest",
+			"request": {
+				"url": "http://localhost:8080/users/3/1/MOVIE",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Add Interest",
+			"request": {
+				"url": "http://localhost:8080/users/3/1/MOVIE",
+				"method": "POST",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Add Recommandation",
+			"request": {
+				"url": "http://localhost:8080/users/3/MOVIE",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\":\"burp\",\"imdb\":\"123456\"}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Recommandation",
+			"request": {
+				"url": "http://localhost:8080/users/3/2",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
