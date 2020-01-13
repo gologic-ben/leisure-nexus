@@ -12,9 +12,9 @@ Connect your fries as inspiration, share your interests and find new referral so
 
 ### Recommand leisures
 
-- Princess Leia as *Movies* and *Music* as source of interests.
-- Princess Leia recommend movies like Star Wars IV and Venom.
-- Princess Leia recommend board games like Catan and Monopoly.
+- Princess Leia has *Movies* and *Music* as sources of interests.
+- Princess Leia recommends movies like Star Wars IV and Venom.
+- Princess Leia recommends board games like Catan and Monopoly.
 
 ```
 
@@ -32,9 +32,9 @@ Connect your fries as inspiration, share your interests and find new referral so
 
 ### Discover new leisures
 
-- Princess Leia as *Movies* and *Music* as source of interests.
+- Princess Leia has *Movies* and *Music* as sources of interests.
 - Princess Leia likes the recommendations of her friends *Tim* and *Bob*
-- Princess Leia can quickly discover new sources of leisure thanks to the recommendations of her friends.
+- Princess Leia can quickly discover new sources of leisure thanks to the recommendations of her friends *Tim* and *Bob*.
 - And so on for all of her sources of interests. 
 
 ```
