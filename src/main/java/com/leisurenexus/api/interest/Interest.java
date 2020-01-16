@@ -5,6 +5,8 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -22,16 +24,26 @@ import com.leisurenexus.api.user.User;
 public class Interest implements Serializable {
   private static final long serialVersionUID = 6226662096874216090L;
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
+  
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
   @Enumerated(EnumType.STRING)
   private InterestType type;
 
-  @Id
   @ManyToOne
   @JoinColumn
   @JsonIgnore
   private User user;
 
-  @Id
   @ManyToOne
   @JoinColumn
   @JsonIgnoreProperties("interests")    // Allow to skip JSON view of sub-attributes "interests" inside entity source 

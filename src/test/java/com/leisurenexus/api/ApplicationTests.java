@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,6 @@ import com.leisurenexus.api.interest.InterestType;
 import com.leisurenexus.api.recommandation.Movie;
 import com.leisurenexus.api.recommandation.Recommandation;
 import com.leisurenexus.api.user.User;
-import com.leisurenexus.api.user.UserRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ApplicationTests {
@@ -68,7 +68,8 @@ class ApplicationTests {
    * 
    * Princess Leia follows the recommendations of her friends *Tim* and *Bob*
    * 
-   * Princess Leia can quickly discover new sources of leisure thanks to the recommendations of her friends.
+   * Princess Leia can quickly discover new sources of leisure thanks to the recommendations of her
+   * friends.
    * 
    * And so on for all of her sources of interests.
    */
@@ -90,10 +91,11 @@ class ApplicationTests {
 
     ctrl.addSource(leiaId, timId, "MOVIE");
     ctrl.addSource(leiaId, bobId, "MOVIE");
-    
+
     // Assert that leia from her interests has direct friends movie recommandations
     Set<Interest> interests = ctrl.getInterests(leiaId);
-    List<Long> friendIds = interests.stream().filter(i -> i.getType().equals(InterestType.MOVIE)).map(i -> i.getUser()).map(u -> u.getId()).distinct().collect(Collectors.toList());
+    assertThat(interests.stream().map(i -> i.getType()).collect(Collectors.toSet())).contains(InterestType.MOVIE);
+    List<Long> friendIds = interests.stream().filter(i -> i.getType().equals(InterestType.MOVIE)).map(i -> i.getSource()).map(u -> u.getId()).distinct().collect(Collectors.toList());
     List<Recommandation> movies = new ArrayList<>();
     for (Long friendId : friendIds) {
       movies.addAll(ctrl.getRecommandations(friendId));
@@ -103,22 +105,50 @@ class ApplicationTests {
                      .map(r -> r.getName())
                      .collect(Collectors.toList())).contains("E.T. the Extra-Terrestrial", "Independence Day", "Ghostbusters", "The Mask", "Titanic");
 
-
-
   }
 
-  // TODO
+  /**
+   * Get new source !
+   * 
+   * Princess Leia and Tim love cinema.
+   * 
+   * Princess Leia sees that her friend Tim likes Xien's movie recommendations.
+   * 
+   * Thanks to Xien, Princess Leia discovers Gladiator and Pulp Fiction !
+   * 
+   * TODO: Add a controller function to retrieve every recommandations by level number ?
+   */
+  @Test
   void testSubLevelRecommandations() throws Exception {
     LOG.info("testSubLevelRecommandations");
-    
-/*
-    xien = repo.save(new User("xien"));
-    tim.addInterest(new Interest(tim, xien, InterestType.MOVIE));
-    tim.addRecommandation(new Movie("Gladiator", "tt0172495"));
-    tim.addRecommandation(new Movie("Pulp Fiction", "tt0110912"));
-    repo.save(tim);
-    repo.save(xien);
-*/
+
+    // Create leia, tim and xien
+    Long leiaId = ctrl.addUser(new User("leia"));
+    Long timId = ctrl.addUser(new User("tim"));
+    Long xienId = ctrl.addUser(new User("xien"));
+
+    // Add tim, xien recommandations
+    ctrl.addRecommandation(xienId, "MOVIE", mapper.readTree("{\"name\":\"Gladiator\",\"imdb\":\"tt0172495\"}"));
+    ctrl.addRecommandation(xienId, "MOVIE", mapper.readTree("{\"name\":\"Pulp Fiction\",\"imdb\":\"tt0110912\"}"));
+
+    // leia follow tim movies, tim follow xien movies
+    ctrl.addSource(leiaId, timId, "MOVIE");
+    ctrl.addSource(timId, xienId, "MOVIE");
+
+    // Assert that leia from her interests has tim's friends movie recommandations
+    Set<Interest> interests = ctrl.getInterests(leiaId);
+    User tim = interests.stream().filter(i -> i.getSource().getName().equals("tim")).findFirst().get().getSource();
+    // Assert that tim has movie as source of interests
+    Set<Interest> timInterests = ctrl.getInterests(tim.getId());
+    assertThat(timInterests.stream().map(i -> i.getType()).collect(Collectors.toSet())).contains(InterestType.MOVIE);
+    // Retrieve Xien recommandations from tim'insterests
+    User xien = timInterests.stream().filter(i -> i.getSource().getName().equals("xien")).findFirst().get().getSource();
+    Set<Recommandation> xienRecommandations = ctrl.getRecommandations(xien.getId());
+
+    assertThat(xienRecommandations.stream()
+                                  .filter(r -> Movie.class.isInstance(r))
+                                  .map(r -> r.getName())
+                                  .collect(Collectors.toList())).contains("Gladiator", "Pulp Fiction");
 
 
   }
