@@ -12,6 +12,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.leisurenexus.api.interest.InterestType;
 import com.leisurenexus.api.user.User;
 
 @Entity
@@ -27,6 +28,10 @@ public abstract class Recommandation {
 
   @Column
   String name;
+
+  public InterestType getType() {
+    throw new RuntimeException("Oups undefined");
+  }
   
   public Long getId() {
     return id;

@@ -118,4 +118,15 @@ public class User {
       interests.remove(interest);
   }
 
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("User [id=");
+    builder.append(id);
+    builder.append(", name=");
+    builder.append(name);
+    builder.append("]");
+    return builder.toString();
+  }
+
 }

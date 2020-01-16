@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +58,7 @@ class ApplicationTests {
     ctrl.addRecommandation(id, "BOARDGAME", mapper.readTree("{\"name\":\"Monopoly\",\"bgg\":\"1406\"}"));
 
     // Assert that leai recommands movies: starwars and venom
-    Set<Recommandation> list = ctrl.getRecommandations(id);
+    Set<Recommandation> list = ctrl.getRecommandations(id, null, 0);
     assertThat(list.stream().filter(r -> Movie.class.isInstance(r)).map(r -> r.getName()).collect(Collectors.toList())).contains("Star Wars IV", "Venom");
   }
 
@@ -98,7 +97,7 @@ class ApplicationTests {
     List<Long> friendIds = interests.stream().filter(i -> i.getType().equals(InterestType.MOVIE)).map(i -> i.getSource()).map(u -> u.getId()).distinct().collect(Collectors.toList());
     List<Recommandation> movies = new ArrayList<>();
     for (Long friendId : friendIds) {
-      movies.addAll(ctrl.getRecommandations(friendId));
+      movies.addAll(ctrl.getRecommandations(friendId, null, 0));
     }
     assertThat(movies.stream()
                      .filter(r -> Movie.class.isInstance(r))
@@ -119,7 +118,7 @@ class ApplicationTests {
    * TODO: Add a controller function to retrieve every recommandations by level number ?
    */
   @Test
-  void testSubLevelRecommandations() throws Exception {
+  void testDeeperRecommandations() throws Exception {
     LOG.info("testSubLevelRecommandations");
 
     // Create leia, tim and xien
@@ -128,27 +127,26 @@ class ApplicationTests {
     Long xienId = ctrl.addUser(new User("xien"));
 
     // Add tim, xien recommandations
+    ctrl.addRecommandation(timId, "MOVIE", mapper.readTree("{\"name\":\"E.T. the Extra-Terrestrial\",\"imdb\":\"tt0083866\"}"));
+    ctrl.addRecommandation(timId, "MOVIE", mapper.readTree("{\"name\":\"Independence Day\",\"imdb\":\"tt0116629\"}"));
+    ctrl.addRecommandation(timId, "BOARDGAME", mapper.readTree("{\"name\":\"Catan\",\"bgg\":\"13\"}"));
     ctrl.addRecommandation(xienId, "MOVIE", mapper.readTree("{\"name\":\"Gladiator\",\"imdb\":\"tt0172495\"}"));
     ctrl.addRecommandation(xienId, "MOVIE", mapper.readTree("{\"name\":\"Pulp Fiction\",\"imdb\":\"tt0110912\"}"));
 
     // leia follow tim movies, tim follow xien movies
     ctrl.addSource(leiaId, timId, "MOVIE");
+    ctrl.addSource(leiaId, timId, "BOARDGAME");
     ctrl.addSource(timId, xienId, "MOVIE");
 
     // Assert that leia from her interests has tim's friends movie recommandations
-    Set<Interest> interests = ctrl.getInterests(leiaId);
-    User tim = interests.stream().filter(i -> i.getSource().getName().equals("tim")).findFirst().get().getSource();
-    // Assert that tim has movie as source of interests
-    Set<Interest> timInterests = ctrl.getInterests(tim.getId());
-    assertThat(timInterests.stream().map(i -> i.getType()).collect(Collectors.toSet())).contains(InterestType.MOVIE);
-    // Retrieve Xien recommandations from tim'insterests
-    User xien = timInterests.stream().filter(i -> i.getSource().getName().equals("xien")).findFirst().get().getSource();
-    Set<Recommandation> xienRecommandations = ctrl.getRecommandations(xien.getId());
+    Set<Recommandation> recommandations = ctrl.getRecommandations(leiaId, "MOVIE", 5);
 
-    assertThat(xienRecommandations.stream()
-                                  .filter(r -> Movie.class.isInstance(r))
-                                  .map(r -> r.getName())
-                                  .collect(Collectors.toList())).contains("Gladiator", "Pulp Fiction");
+    List<String> movies = recommandations.stream()
+                                         .filter(r -> Movie.class.isInstance(r))
+                                         .map(r -> r.getName())
+                                         .collect(Collectors.toList());
+    LOG.info("Found " + movies);
+    assertThat(movies).contains("E.T. the Extra-Terrestrial", "Independence Day", "Gladiator", "Pulp Fiction");
 
 
   }

@@ -4,6 +4,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.leisurenexus.api.interest.InterestType;
+
 /**
  * Movie is a Recommandation of a Interest
  */
@@ -23,12 +25,16 @@ public class Movie extends Recommandation {
     this.name = name;
     this.imdb = imdb;
   }
-  
+
   public Movie(Long id, String name, String imdb) {
     super();
     this.setId(id);
     this.name = name;
     this.imdb = imdb;
+  }
+
+  public InterestType getType() {
+    return InterestType.MOVIE;
   }
 
   public String getImdb() {

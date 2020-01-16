@@ -4,6 +4,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.leisurenexus.api.interest.InterestType;
+
 /**
  * Boardgame is a Recommandation of a Interest
  */
@@ -32,6 +34,10 @@ public class Boardgame extends Recommandation {
     this.bgg = bgg;
   }
 
+  public InterestType getType() {
+    return InterestType.BOARDGAME;
+  }
+  
   public String getBgg() {
     return bgg;
   }
