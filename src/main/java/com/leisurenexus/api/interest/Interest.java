@@ -1,4 +1,4 @@
-package com.leisurenexus.api.model;
+package com.leisurenexus.api.interest;
 
 import java.io.Serializable;
 
@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.leisurenexus.api.user.User;
 
 /**
  * Interest belongs to a user, contains a list of source which have recommandations.
@@ -22,7 +23,7 @@ public class Interest implements Serializable {
   private static final long serialVersionUID = 6226662096874216090L;
 
   @Enumerated(EnumType.STRING)
-  private InterestEnum type;
+  private InterestType type;
 
   @Id
   @ManyToOne
@@ -35,23 +36,23 @@ public class Interest implements Serializable {
   @JoinColumn
   @JsonIgnoreProperties("interests")    // Allow to skip JSON view of sub-attributes "interests" inside entity source 
   private User source;
-
+  
   public Interest() {
     super();
   }
 
-  public Interest(User user, User source, InterestEnum type) {
+  public Interest(User user, User source, InterestType type) {
     super();
     this.user = user;
     this.source = source;
     this.type = type;
   }
 
-  public InterestEnum getType() {
+  public InterestType getType() {
     return type;
   }
 
-  public void setType(InterestEnum type) {
+  public void setType(InterestType type) {
     this.type = type;
   }
 

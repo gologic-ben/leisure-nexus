@@ -1,4 +1,4 @@
-package com.leisurenexus.api.model;
+package com.leisurenexus.api.user;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,7 +16,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.leisurenexus.api.interest.Interest;
+import com.leisurenexus.api.recommandation.Recommandation;
 
 @Entity
 @Table(name = "user")
@@ -28,14 +34,16 @@ public class User {
   @Column(nullable = false)
   private String name;
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
   @JoinTable(name = "recommandation_users", joinColumns = @JoinColumn(name = "users_id"), inverseJoinColumns = @JoinColumn(name = "recommandation_id"))
   private Set<Recommandation> recommandations = new HashSet<>();
 
   // Mapping to interests, allow a user to scan his interests
-  @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
   private Set<Interest> interests;
-  
+
   // Mapping to sources, allow a user to scan his sources (other users) of interests
   @OneToMany(mappedBy = "source", cascade = CascadeType.ALL)
   @JsonIgnore

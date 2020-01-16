@@ -1,4 +1,4 @@
-package com.leisurenexus.api.model;
+package com.leisurenexus.api.recommandation;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

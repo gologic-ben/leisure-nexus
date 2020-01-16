@@ -1,4 +1,4 @@
-package com.leisurenexus.api.model;
+package com.leisurenexus.api.user;
 
 import org.springframework.data.repository.CrudRepository;
 

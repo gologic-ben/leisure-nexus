@@ -1,4 +1,4 @@
-package com.leisurenexus.api.model;
+package com.leisurenexus.api.recommandation;
 
 import java.util.Set;
 
@@ -12,6 +12,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.leisurenexus.api.user.User;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -26,7 +27,7 @@ public abstract class Recommandation {
 
   @Column
   String name;
-   
+  
   public Long getId() {
     return id;
   }
