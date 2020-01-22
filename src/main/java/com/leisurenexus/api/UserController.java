@@ -75,6 +75,9 @@ public class UserController {
   public void addSource(@PathVariable("userId") Long userId, @PathVariable("sourceId") Long sourceId, @PathVariable("interestType") String interestType) throws UserNotFoundException {
     User user = getUser(userId);
     User source = getUser(sourceId);
+    if(user == source) {
+      throw new IllegalArgumentException("Cannot have himself as a source");
+    }
     InterestType interest = InterestType.valueOf(interestType);
     user.addInterest(new Interest(user, source, interest));
     userRepository.save(source);

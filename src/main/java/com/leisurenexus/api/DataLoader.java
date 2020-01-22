@@ -1,5 +1,8 @@
 package com.leisurenexus.api;
 
+import java.util.List;
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +19,7 @@ import com.leisurenexus.api.user.UserRepository;
 @Component
 public class DataLoader implements ApplicationRunner {
   private static Logger LOG = LoggerFactory.getLogger(DataLoader.class);
-  
+
   UserRepository userRepository;
 
   @Autowired
@@ -30,14 +33,68 @@ public class DataLoader implements ApplicationRunner {
     User ben = new User("ben");
     ben.addRecommandation(new Movie("titanic", "ABC"));
     ben.addRecommandation(new Movie("gremlins", "DEF"));
-    
+
     User paul = new User("paul");
     paul.addRecommandation(new Movie("pulp fiction", "GHI"));
-      
+
     ben.addInterest(new Interest(ben, paul, InterestType.MOVIE));
-    
+
     userRepository.save(paul);
     userRepository.save(ben);
 
+    // Generate random users
+    // for each users Generate random movies and add recommandations
+    // for each users add random users as interests (except himself)
+    Double nbUsers = getRandomDoubleBetweenRange(5, 10);
+    for (int i = 0; i <= nbUsers; i++) {
+      User u = new User(generateName());
+      Double nbMovies = getRandomDoubleBetweenRange(10, 20);
+      for (int j = 0; j <= nbMovies; j++) {
+        u.addRecommandation(new Movie(generateName(), "imdb"));
+      }
+      userRepository.save(u);
+    }
+    
+    List<User> users = (List<User>) userRepository.findAll();
+    for(User owner: users) {
+      Double nbUsersAsInterets = getRandomDoubleBetweenRange(0, 5);
+      for(int i=0; i <= nbUsersAsInterets; i++) {
+        User source = users.get(getRandomDoubleBetweenRange(0, users.size()-1).intValue());
+        if(source != owner) {
+          owner.addInterest(new Interest(owner, source, InterestType.MOVIE));
+          userRepository.save(source);
+          userRepository.save(owner);
+        }
+      }      
+    }
+
+
+
   }
+
+  private static String[] Beginning = {"Kr", "Ca", "Ra", "Mrok", "Cru",
+                                       "Ray", "Bre", "Zed", "Drak", "Mor", "Jag", "Mer", "Jar", "Mjol",
+                                       "Zork", "Mad", "Cry", "Zur", "Creo", "Azak", "Azur", "Rei", "Cro",
+                                       "Mar", "Luk"};
+  private static String[] Middle = {"air", "ir", "mi", "sor", "mee", "clo",
+                                    "red", "cra", "ark", "arc", "miri", "lori", "cres", "mur", "zer",
+                                    "marac", "zoir", "slamar", "salmar", "urak"};
+  private static String[] End = {"d", "ed", "ark", "arc", "es", "er", "der",
+                                 "tron", "med", "ure", "zur", "cred", "mur"};
+
+  private static Random rand = new Random();
+
+  public static String generateName() {
+
+    return Beginning[rand.nextInt(Beginning.length)] +
+           Middle[rand.nextInt(Middle.length)] +
+           End[rand.nextInt(End.length)];
+
+  }
+
+  public static Double getRandomDoubleBetweenRange(double min, double max) {
+    Double x = (Math.random() * ((max - min) + 1)) + min;
+    return x;
+  }
+
 }
