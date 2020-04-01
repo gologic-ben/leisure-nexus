@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.leisurenexus.api.interest.Interest;
+import com.leisurenexus.api.interest.InterestType;
 import com.leisurenexus.api.recommandation.Recommandation;
 import com.leisurenexus.api.user.User;
 import com.leisurenexus.api.user.UserNotFoundException;
@@ -25,10 +26,9 @@ public class CytoscapeController {
   private @Autowired com.leisurenexus.api.user.UserRepository userRepository;
 
   /**
-   * elements : {
-        nodes : [ { data : { id : 'cat', name : 'Cat', type: 'user' } }, { data : { id : 'bird', name : 'Bird', type: 'interest' } } ],
-        edges : [ { data : { source : 'cat', target : 'bird' } ]
-    },
+   * elements : { nodes : [ { data : { id : 'cat', name : 'Cat', type: 'user' } }, { data : { id :
+   * 'bird', name : 'Bird', type: 'interest' } } ], edges : [ { data : { source : 'cat', target :
+   * 'bird' } ] },
    * @param id
    * @return
    * @throws UserNotFoundException
@@ -36,43 +36,50 @@ public class CytoscapeController {
   @GetMapping("/cytoscape/users/{id}")
   public Map<String, List<Object>> getUser(@PathVariable("id") Long id) throws UserNotFoundException {
     LOG.info("cytoscape of {}", id);
-    
+
     Map<String, List<Object>> elements = new HashMap<String, List<Object>>();
     elements.put("nodes", new ArrayList<Object>());
     elements.put("edges", new ArrayList<Object>());
-    
+
     Optional<User> user = userRepository.findById(id);
     if (user.isPresent()) {
       User u = user.get();
       addNode(elements, u.getId().toString(), user.get().getName(), u.getClass());
       // for each recommandations create a node and a edge
-      for(Recommandation r: u.getRecommandations()) {
+      for (Recommandation r : u.getRecommandations()) {
         addNode(elements, r.getId().toString(), r.getName(), r.getClass());
         addEdge(elements, u.getId().toString(), r.getId().toString());
       }
-      // for each interests type create a node and a edge
-      List<String> interestIdList = new ArrayList<>();
-      for(Interest i: u.getInterests()) {
-        User s = i.getSource();
-        String interestId = i.getType().name() + "-" + u.getId().toString();
-        if(!interestIdList.contains(interestId)) {
-          addNode(elements, interestId, i.getType().name(), i.getType().getClass());
-          addEdge(elements, u.getId().toString(), interestId);
-          interestIdList.add(interestId);
+      // foreach interest types create a node and a edge
+      for (InterestType type : InterestType.values()) {
+        LOG.info("InterestType {}", type);        
+        String interestId = type.name() + "-" + u.getId().toString();
+        addNode(elements, interestId, type.name(), type.getClass());
+        addEdge(elements, u.getId().toString(), interestId);
+
+        // foreach interests of "type", create a node and a edge
+        for (Interest i : u.getInterests()) {
+          LOG.info("Interest {}", i);
+          if (i.getType().equals(type)) {
+            User s = i.getSource();
+            // create a node and a edge for source link to interests type
+            addNode(elements, s.getId().toString(), s.getName()+"-"+s.getId(), u.getClass());
+            addEdge(elements, interestId, s.getId().toString());
+
+            // for each source's recommendation of "type" create a node and a edge
+            for (Recommandation rs : s.getRecommandations()) {
+              LOG.info("Recommandation {}", rs);
+              if(rs.getClass().equals(type.getRecommandationClass())) {
+                addNode(elements, rs.getId().toString(), rs.getName(), rs.getClass());
+                addEdge(elements, s.getId().toString(), rs.getId().toString());
+              }
+            }
+
+          }
         }
-        // create a node and a edge for source link to interests type
-        addNode(elements, s.getId().toString(), s.getName(), u.getClass());
-        addEdge(elements, interestId, s.getId().toString());
-                
-        // for each source's recommendation create a node and a edge        
-        for(Recommandation rs: s.getRecommandations()) {
-          addNode(elements, rs.getId().toString(), rs.getName(), rs.getClass());
-          addEdge(elements, s.getId().toString(), rs.getId().toString());
-        }
-        
       }
       return elements;
-      
+
     }
     throw new UserNotFoundException();
   }

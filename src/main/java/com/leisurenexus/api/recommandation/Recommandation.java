@@ -18,6 +18,7 @@ import com.leisurenexus.api.user.User;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Recommandation {
+ 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
@@ -86,6 +87,19 @@ public abstract class Recommandation {
     } else if (!name.equals(other.name))
       return false;
     return true;
-  }   
+  }
+  
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("Recommandation [id=");
+    builder.append(id);
+    builder.append(", name=");
+    builder.append(name);
+    builder.append(", type=");
+    builder.append(this.getClass());
+    builder.append("]");
+    return builder.toString();
+  }
   
 }

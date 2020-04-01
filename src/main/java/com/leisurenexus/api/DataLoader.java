@@ -12,7 +12,10 @@ import org.springframework.stereotype.Component;
 
 import com.leisurenexus.api.interest.Interest;
 import com.leisurenexus.api.interest.InterestType;
+import com.leisurenexus.api.recommandation.Boardgame;
 import com.leisurenexus.api.recommandation.Movie;
+import com.leisurenexus.api.recommandation.Music;
+import com.leisurenexus.api.recommandation.TvShow;
 import com.leisurenexus.api.user.User;
 import com.leisurenexus.api.user.UserRepository;
 
@@ -48,24 +51,50 @@ public class DataLoader implements ApplicationRunner {
     Double nbUsers = getRandomDoubleBetweenRange(5, 10);
     for (int i = 0; i <= nbUsers; i++) {
       User u = new User(generateName());
-      Double nbMovies = getRandomDoubleBetweenRange(10, 20);
-      for (int j = 0; j <= nbMovies; j++) {
-        u.addRecommandation(new Movie(generateName(), "imdb"));
+      for (int j = 0; j <= getRandomDoubleBetweenRange(0, 8); j++) {
+        u.addRecommandation(new Movie(generateName(), ""));
+      }
+      for (int j = 0; j <= getRandomDoubleBetweenRange(0, 8); j++) {
+        u.addRecommandation(new Boardgame(generateName(), ""));
+      }
+      for (int j = 0; j <= getRandomDoubleBetweenRange(0, 8); j++) {
+        u.addRecommandation(new Music(generateName(), "", "", ""));
+      }
+      for (int j = 0; j <= getRandomDoubleBetweenRange(0, 8); j++) {
+        u.addRecommandation(new TvShow(generateName(), ""));
       }
       userRepository.save(u);
     }
-    
+
     List<User> users = (List<User>) userRepository.findAll();
-    for(User owner: users) {
+    for (User owner : users) {
       Double nbUsersAsInterets = getRandomDoubleBetweenRange(0, 5);
-      for(int i=0; i <= nbUsersAsInterets; i++) {
-        User source = users.get(getRandomDoubleBetweenRange(0, users.size()-1).intValue());
-        if(source != owner) {
-          owner.addInterest(new Interest(owner, source, InterestType.MOVIE));
-          userRepository.save(source);
+      for (int i = 0; i <= nbUsersAsInterets; i++) {
+        User movieSource = users.get(getRandomDoubleBetweenRange(0, users.size() - 1).intValue());
+        if (movieSource != owner) {
+          owner.addInterest(new Interest(owner, movieSource, InterestType.MOVIE));
+          userRepository.save(movieSource);
           userRepository.save(owner);
         }
-      }      
+        User musicSource = users.get(getRandomDoubleBetweenRange(0, users.size() - 1).intValue());
+        if (musicSource != owner) {
+          owner.addInterest(new Interest(owner, musicSource, InterestType.MUSIC));
+          userRepository.save(musicSource);
+          userRepository.save(owner);
+        }
+        User tvShowSource = users.get(getRandomDoubleBetweenRange(0, users.size() - 1).intValue());
+        if (tvShowSource != owner) {
+          owner.addInterest(new Interest(owner, tvShowSource, InterestType.TVSHOW));
+          userRepository.save(tvShowSource);
+          userRepository.save(owner);
+        }
+        User boardgameSource = users.get(getRandomDoubleBetweenRange(0, users.size() - 1).intValue());
+        if (boardgameSource != owner) {
+          owner.addInterest(new Interest(owner, boardgameSource, InterestType.BOARDGAME));
+          userRepository.save(boardgameSource);
+          userRepository.save(owner);
+        }
+      }
     }
 
 

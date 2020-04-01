@@ -22,12 +22,13 @@ import com.leisurenexus.api.user.User;
 @Entity
 @Table(name = "interest")
 public class Interest implements Serializable {
+
   private static final long serialVersionUID = 6226662096874216090L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
-  
+
   public Long getId() {
     return id;
   }
@@ -46,9 +47,10 @@ public class Interest implements Serializable {
 
   @ManyToOne
   @JoinColumn
-  @JsonIgnoreProperties("interests")    // Allow to skip JSON view of sub-attributes "interests" inside entity source 
+  @JsonIgnoreProperties("interests") // Allow to skip JSON view of sub-attributes "interests" inside
+                                     // entity source
   private User source;
-  
+
   public Interest() {
     super();
   }
@@ -107,8 +109,8 @@ public class Interest implements Serializable {
       if (other.source != null)
         return false;
     } else if (other.source == null) {
-        if (source != null)
-          return false;
+      if (source != null)
+        return false;
     } else if (!source.getId().equals(other.source.getId()))
       return false;
     if (type != other.type)
@@ -124,6 +126,19 @@ public class Interest implements Serializable {
     return true;
   }
 
-
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("Interest [id=");
+    builder.append(id);
+    builder.append(", type=");
+    builder.append(type);
+    builder.append(", user=");
+    builder.append(user.getName());
+    builder.append(", source=");
+    builder.append(source.getName());
+    builder.append("]");
+    return builder.toString();
+  }
 
 }

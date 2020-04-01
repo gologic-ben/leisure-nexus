@@ -10,18 +10,25 @@ function GetParameterValues(param) {
 
 $(document).ready(function() {
 
-	var userId = GetParameterValues('userId');
-	if(userId == null) {
+	var userId = GetParameterValues('id');
+	if (userId == null) {
 		userId = 1;
 	}
-	$.getJSON("cytoscape/users/"+userId, function(data) {
+	renderCytoscape(userId);
+
+});
+
+function renderCytoscape(userId) {
+
+	$.getJSON("cytoscape/users/" + userId, function(data) {
+
 		var cy = cytoscape({
 			container : document.getElementById('cy'),
 			boxSelectionEnabled : false,
 			autounselectify : true,
 
 			style : cytoscape.stylesheet().selector('node').css({
-				'shape': 'ellipse', 
+				'shape' : 'ellipse',
 				'height' : 80,
 				'width' : 80,
 				'background-fit' : 'cover',
@@ -41,14 +48,21 @@ $(document).ready(function() {
 				'line-color' : '#ffaaaa',
 				'target-arrow-color' : '#ffaaaa'
 			}).selector('node[type = "User"]').css({
-				'background-color' : '#DDD', 
-				'shape': 'rectangle',
+				'background-color' : '#DDD',
+				'shape' : 'rectangle',
 				'height' : 90,
 				'width' : 90,
-			}).selector('node[type = "InterestType"]').css({
-				'background-color' : '#AAA', 
-				'shape': 'star'
-			}),			
+			}).selector('node[name = "InterestType"]').css({
+				'background-color' : '#E00'
+			}).selector('node[type = "Movie"]').css({
+				'background-color' : '#0E0'
+			}).selector('node[type = "Boardgame"]').css({
+				'background-color' : '#00E'
+			}).selector('node[type = "TvShow"]').css({
+				'background-color' : '#0EE'
+			}).selector('node[type = "Music"]').css({
+				'background-color' : '#EE0'
+			}),
 			elements : data,
 			layout : {
 				name : 'cose',
@@ -57,6 +71,13 @@ $(document).ready(function() {
 			}
 
 		}); // cy init
+		cy.on('tap', 'node', function() {
+			var id = this.data('id');
+			if(this.data('type')) {				
+				renderCytoscape(id);	
+			}
+			
+		});
 	});
 
-});
+}
