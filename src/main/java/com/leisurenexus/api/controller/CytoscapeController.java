@@ -1,10 +1,9 @@
-package com.leisurenexus.api;
+package com.leisurenexus.api.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,17 +12,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.leisurenexus.api.interest.Interest;
-import com.leisurenexus.api.interest.InterestType;
-import com.leisurenexus.api.recommandation.Recommandation;
-import com.leisurenexus.api.user.User;
-import com.leisurenexus.api.user.UserNotFoundException;
+import com.leisurenexus.api.service.UserNotFoundException;
 
 @RestController
 public class CytoscapeController {
   private static Logger LOG = LoggerFactory.getLogger(CytoscapeController.class);
 
-  private @Autowired com.leisurenexus.api.user.UserRepository userRepository;
+  private @Autowired com.leisurenexus.api.service.UserRepository userRepository;
 
   /**
    * elements : { nodes : [ { data : { id : 'cat', name : 'Cat', type: 'user' } }, { data : { id :
@@ -36,11 +31,11 @@ public class CytoscapeController {
   @GetMapping("/cytoscape/users/{id}")
   public Map<String, List<Object>> getUser(@PathVariable("id") Long id) throws UserNotFoundException {
     LOG.info("cytoscape of {}", id);
-
     Map<String, List<Object>> elements = new HashMap<String, List<Object>>();
     elements.put("nodes", new ArrayList<Object>());
     elements.put("edges", new ArrayList<Object>());
 
+/*
     Optional<User> user = userRepository.findById(id);
     if (user.isPresent()) {
       User u = user.get();
@@ -58,7 +53,7 @@ public class CytoscapeController {
         addEdge(elements, u.getId().toString(), interestId);
 
         // foreach interests of "type", create a node and a edge
-        for (Interest i : u.getInterests()) {
+        for (Reference i : u.getInterests()) {
           LOG.info("Interest {}", i);
           if (i.getType().equals(type)) {
             User s = i.getSource();
@@ -78,10 +73,9 @@ public class CytoscapeController {
           }
         }
       }
-      return elements;
-
-    }
-    throw new UserNotFoundException();
+*/
+    return elements;
+//    throw new UserNotFoundException();
   }
 
   private void addNode(Map<String, List<Object>> parent, String id, String name, Class<?> type) {

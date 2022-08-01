@@ -1,4 +1,4 @@
-package com.leisurenexus.api.user;
+package com.leisurenexus.api.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

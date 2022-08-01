@@ -1,4 +1,4 @@
-package com.leisurenexus.api;
+package com.leisurenexus.api.controller;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdDate", "modifiedDate", "createdUserId", "modifiedUserId"}, allowGetters = true)
-public abstract class Audit implements Serializable {
+public abstract class AuditListener implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private @CreatedBy Long createdUserId;

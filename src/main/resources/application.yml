@@ -2,7 +2,7 @@
 # DEBUG JPA/SQL
 spring:
   jpa:
-    show-sql: false
+    show-sql: true
 
 logging.level.root: INFO 
 #logging.level.org.hibernate.SQL: DEBUG
