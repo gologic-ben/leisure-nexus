@@ -1,4 +1,4 @@
-package com.leisurenexus.api;
+package com.leisurenexus;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

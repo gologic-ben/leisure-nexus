@@ -1,91 +1,73 @@
 package com.leisurenexus.api.controller;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.leisurenexus.api.service.Reference;
+import com.leisurenexus.api.service.User;
 
-import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 
 @RestController
-@Log
+@RequestMapping("api")
+@Log4j2
 public class ReferenceController {
-  private @Autowired com.leisurenexus.api.service.ReferenceRepository refRepository;
+	private @Autowired com.leisurenexus.api.service.ReferenceRepository repository;
 
 	@GetMapping("/ref")
-	public Iterable<Reference> getReferences() {
-		log.info("Find all references");
-		return refRepository.findAll();
+	public Collection<Reference> getReferences(@RequestParam(required = false) Long sourceId,
+			@RequestParam(required = false) Long targetId, @RequestParam(required = false) String externalId) {
+		if (sourceId == null && targetId == null && externalId == null) {
+			return Collections.emptyList();
+		}
+		User source = User.builder().id(sourceId).build();
+		User target = User.builder().id(targetId).build();
+		Reference example = Reference.builder().source(source).target(target).externalId(externalId).build();
+
+		log.info("Searching references for: " + example);
+
+		return repository.findAll(Example.of(example));
+
 	}
-/*
-  @GetMapping("/users/{id}")
-  public User getUser(@PathVariable("id") Long id) throws UserNotFoundException {
-    Optional<User> user = userRepository.findById(id);
-    if (user.isPresent()) {
-      return user.get();
-    }
-    throw new UserNotFoundException();
-  }
 
-  @PostMapping(path = "/users")
-  public Long addUser(@RequestBody User user) throws UserNotFoundException {
-    // Filtering attributes
-    if (StringUtils.isEmpty(user.getName())) {
-      throw new IllegalArgumentException("name is mandatory");
-    }
-    if (user.getId() != null) {
-      User savedUser = getUser(user.getId());
-      savedUser.setName(user.getName());
-      userRepository.save(savedUser);
-      return savedUser.getId();
-    } else {
-      User newUser = new User(user.getName());
-      userRepository.save(newUser);
-      return newUser.getId();
-    }
+	// Add a reference to a source and optionaly to a target
+	@PostMapping(path = "/ref")
+	public ResponseEntity<Void> addReference(@RequestParam Long sourceId, @RequestParam(required = false) Long targetId,
+			@RequestParam String externalId) {
+		// TODO: Check if sourceId equals to Authenticated User
 
-  }
+		// check if not exist
+		if (getReferences(sourceId, targetId, externalId).isEmpty()) {
+			User source = User.builder().id(sourceId).build();
+			User target = User.builder().id(targetId).build();
+			
+			try {
+				Reference add = Reference.builder().source(source).target(target).externalId(externalId).build();
+				repository.save(add);
+			} catch(RuntimeException e) {
+				log.error("An error occured while saving reference", e);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+			}
+		}
+		return ResponseEntity.ok(null);
 
-  @GetMapping(path = "/users/{userId}/interests")
-  public Set<Reference> getInterests(@PathVariable("userId") Long userId) throws UserNotFoundException {
-    User user = getUser(userId);
-    Set<Reference> list = user.getInterests();
-    return list;
-  }
+	}
 
-  @PostMapping(path = "/users/{userId}/interests/{sourceId}/{interestType}")
-  public void addSource(@PathVariable("userId") Long userId, @PathVariable("sourceId") Long sourceId, @PathVariable("interestType") String interestType) throws UserNotFoundException {
-    User user = getUser(userId);
-    User source = getUser(sourceId);
-    if(user == source) {
-      throw new IllegalArgumentException("Cannot have himself as a source");
-    }
-    InterestType interest = InterestType.valueOf(interestType);
-    user.addInterest(new Reference(user, source, interest));
-    userRepository.save(source);
-    userRepository.save(user);
-  }
+	@DeleteMapping(path = "/ref")
+	public void remove(@RequestParam Long sourceId, @RequestParam String externalId) {
+		// TODO: Check if sourceId equals to Authenticated User
+		repository.deleteBySourceIdAndExternalId(sourceId, externalId);
+	}
 
-  @DeleteMapping(path = "/users/{userId}/interests/{sourceId}/{interestType}")
-  public void removeSource(@PathVariable("userId") Long userId, @PathVariable("sourceId") Long sourceId, @PathVariable("interestType") String interestType) throws UserNotFoundException {
-    User user = getUser(userId);
-    User source = getUser(sourceId);
-    InterestType interest = InterestType.valueOf(interestType);
-    user.removeInterest(new Reference(user, source, interest));
-    userRepository.save(user);
-  }
-
-  @DeleteMapping(path = "/users/{userId}/recommandations/{recommandationId}")
-  public void removeSource(@PathVariable("userId") Long userId, @PathVariable("recommandationId") Long recommandationId) throws UserNotFoundException {
-    User user = getUser(userId);
-    for (Iterator<Recommandation> iterator = user.getRecommandations().iterator(); iterator.hasNext();) {
-      Recommandation r = iterator.next();
-      if (r.getId().equals(recommandationId)) {
-        iterator.remove();
-      }
-    }
-    userRepository.save(user);
-  }
-*/
 }

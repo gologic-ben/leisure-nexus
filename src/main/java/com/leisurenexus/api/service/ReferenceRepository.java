@@ -1,6 +1,7 @@
 package com.leisurenexus.api.service;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ReferenceRepository extends CrudRepository<Reference, Long> {
+public interface ReferenceRepository extends JpaRepository<Reference, Long> {
+	void deleteBySourceIdAndExternalId(Long sourceId, String externalId);
 }

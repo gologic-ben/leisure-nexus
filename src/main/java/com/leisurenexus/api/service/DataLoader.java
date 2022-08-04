@@ -1,21 +1,15 @@
-package com.leisurenexus.api.controller;
+package com.leisurenexus.api.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import com.leisurenexus.api.service.Reference;
-import com.leisurenexus.api.service.ReferenceRepository;
-import com.leisurenexus.api.service.User;
-import com.leisurenexus.api.service.UserRepository;
+import lombok.extern.log4j.Log4j2;
 
 @Component
+@Log4j2
 public class DataLoader implements ApplicationRunner {
-  private static Logger LOG = LoggerFactory.getLogger(DataLoader.class);
-
   UserRepository userRepository;
   ReferenceRepository refRepository;
 
@@ -26,7 +20,7 @@ public class DataLoader implements ApplicationRunner {
   }
 
   public void run(ApplicationArguments args) {
-    LOG.info("DataLoader::Loading data...");
+    log.info("DataLoader::Loading data...");
 
     User ben = User.builder().name("ben").build();
     User paul = User.builder().name("paul").build();
@@ -35,6 +29,9 @@ public class DataLoader implements ApplicationRunner {
     Reference jurassic = Reference.builder().source(ben).target(paul).externalId("tt8041270").build();
     Reference titanic = Reference.builder().source(ben).target(paul).externalId("tt0120338").build();
     Reference ameliepoulin = Reference.builder().source(poulette).target(ben).externalId("tt0211915").build();
+    Reference gb = Reference.builder().source(ben).target(poulette).externalId("tt0087332").build();
+    Reference gremlins = Reference.builder().source(paul).target(ben).externalId("tt0087363").build();
+    Reference terminator = Reference.builder().source(poulette).target(paul).externalId("tt0088247").build();
     
     userRepository.save(ben);
     userRepository.save(paul);
@@ -43,7 +40,11 @@ public class DataLoader implements ApplicationRunner {
     refRepository.save(jurassic);
     refRepository.save(titanic);
     refRepository.save(ameliepoulin);
+    refRepository.save(gb);
+    refRepository.save(gremlins);
+    refRepository.save(terminator);
 
+    log.info("DataLoader::Data loaded...");    
   }
 /*
   private static String[] Beginning = {"Kr", "Ca", "Ra", "Mrok", "Cru",

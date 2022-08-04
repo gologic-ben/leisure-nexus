@@ -8,8 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import com.leisurenexus.api.controller.AuditListener;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,11 +26,11 @@ public class Reference {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "source_id")
+	@JoinColumn(name = "source_id", nullable = false)
 	User source;
 
 	@ManyToOne
-	@JoinColumn(name = "target_id", nullable = false)
+	@JoinColumn(name = "target_id")
 	User target;
 
 	// External reference id:IMDB movie identifier like tt8041270

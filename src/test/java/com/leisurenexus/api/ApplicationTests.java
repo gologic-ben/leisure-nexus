@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+//import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leisurenexus.api.controller.UserController;
 
 import lombok.extern.java.Log;
@@ -16,7 +16,7 @@ import lombok.extern.java.Log;
 @Log
 class ApplicationTests {
 	private @Autowired UserController ctrl;
-	private ObjectMapper mapper = new ObjectMapper();
+//	private ObjectMapper mapper = new ObjectMapper();
 
 	@Test
 	public void contexLoads() throws Exception {

@@ -1,4 +1,4 @@
-package com.leisurenexus.api.controller;
+package com.leisurenexus.api.service;
 
 import java.io.Serializable;
 import java.util.Date;
