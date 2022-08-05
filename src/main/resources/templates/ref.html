@@ -10,21 +10,21 @@
 	<p>You have referred the following movies</p>
 	<ul>
 		<li th:each="ref: ${sourceReferences}"><em
-			th:text="'Movie ' + ${ref.externalId} + ' is referred to ' + ${ref.target?.name}"></em>
+			th:text="'Movie ' + ${ref.title} + ' is referred to ' + ${ref.target?.name}"></em>
 			<a th:href="@{/web/remove(userId=${ref.source.id},referenceId=${ref.id})}">Remove</a>
 		</li>
 	</ul>
 	<form class="form-inline" th:action="@{/web/add}">
 		<input type="hidden" name="sourceId" th:value="${user.id}"> 
 		<label for="targetId">Target ID:</label> <input type="text" id="targetId" placeholder="Enter targetId" name="targetId"> 
-		<label for="externalId">IMDB ID:</label> <input type="text" id="externalId" placeholder="Enter IMDB movie ID" name="externalId"> 
+		<label for="tmdbId">TMDB ID:</label> <input type="text" id="tmdbId" placeholder="Enter TMDB movie ID" name="tmdbId"> 
 		<button type="submit">Submit</button>
 	</form>
 
 	<p>Your friends have referred you the following movies</p>
 	<ul>
 		<li th:each="ref: ${targetReferences}"><em
-			th:text="'Movie ' + ${ref.externalId} + ' is referred from ' + ${ref.source.name}"></em>
+			th:text="'Movie ' + ${ref.title} + ' is referred from ' + ${ref.source.name}"></em>
 			<a th:href="@{/web/remove(userId=${ref.target.id},referenceId=${ref.id})}">Remove</a>
 		</li>
 	</ul>

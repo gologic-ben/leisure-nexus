@@ -26,14 +26,13 @@ public class ReferenceController {
 	private @Autowired com.leisurenexus.api.service.ReferenceRepository repository;
 
 	@GetMapping("/ref")
-	public Collection<Reference> getReferences(@RequestParam(required = false) Long sourceId,
-			@RequestParam(required = false) Long targetId, @RequestParam(required = false) String externalId) {
-		if (sourceId == null && targetId == null && externalId == null) {
+	public Collection<Reference> getReferences(@RequestParam(required = false) Long sourceId, @RequestParam(required = false) Long targetId, @RequestParam(required = false) Long tmdbId) {
+		if (sourceId == null && targetId == null && tmdbId == null) {
 			return Collections.emptyList();
 		}
 		User source = User.builder().id(sourceId).build();
 		User target = User.builder().id(targetId).build();
-		Reference example = Reference.builder().source(source).target(target).externalId(externalId).build();
+		Reference example = Reference.builder().source(source).target(target).tmdbId(tmdbId).build();
 
 		log.info("Searching references for: " + example);
 
@@ -43,17 +42,16 @@ public class ReferenceController {
 
 	// Add a reference to a source and optionaly to a target
 	@PostMapping(path = "/ref")
-	public ResponseEntity<Void> addReference(@RequestParam Long sourceId, @RequestParam(required = false) Long targetId,
-			@RequestParam String externalId) {
+	public ResponseEntity<Void> addReference(@RequestParam Long sourceId, @RequestParam(required = false) Long targetId, @RequestParam Long tmdbId) {
 		// TODO: Check if sourceId equals to Authenticated User
 
 		// check if not exist
-		if (getReferences(sourceId, targetId, externalId).isEmpty()) {
+		if (getReferences(sourceId, targetId, tmdbId).isEmpty()) {
 			User source = User.builder().id(sourceId).build();
 			User target = User.builder().id(targetId).build();
 			
 			try {
-				Reference add = Reference.builder().source(source).target(target).externalId(externalId).build();
+				Reference add = Reference.builder().source(source).target(target).tmdbId(tmdbId).build();
 				repository.save(add);
 			} catch(RuntimeException e) {
 				log.error("An error occured while saving reference", e);
@@ -65,9 +63,9 @@ public class ReferenceController {
 	}
 
 	@DeleteMapping(path = "/ref")
-	public void remove(@RequestParam Long sourceId, @RequestParam String externalId) {
+	public void remove(@RequestParam Long sourceId, @RequestParam Long tmdbId) {
 		// TODO: Check if sourceId equals to Authenticated User
-		repository.deleteBySourceIdAndExternalId(sourceId, externalId);
+		repository.deleteBySourceIdAndTmdbId(sourceId, tmdbId);
 	}
 
 }

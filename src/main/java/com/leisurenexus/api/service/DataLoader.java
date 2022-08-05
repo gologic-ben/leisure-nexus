@@ -26,12 +26,12 @@ public class DataLoader implements ApplicationRunner {
     User paul = User.builder().name("paul").build();
     User poulette = User.builder().name("poulette").build();
     
-    Reference jurassic = Reference.builder().source(ben).target(paul).externalId("tt8041270").build();
-    Reference titanic = Reference.builder().source(ben).target(paul).externalId("tt0120338").build();
-    Reference ameliepoulin = Reference.builder().source(poulette).target(ben).externalId("tt0211915").build();
-    Reference gb = Reference.builder().source(ben).target(poulette).externalId("tt0087332").build();
-    Reference gremlins = Reference.builder().source(paul).target(ben).externalId("tt0087363").build();
-    Reference terminator = Reference.builder().source(poulette).target(paul).externalId("tt0088247").build();
+    Reference jurassic = Reference.builder().source(ben).target(paul).tmdbId(507086L).build();
+    Reference titanic = Reference.builder().source(ben).target(paul).tmdbId(597L).build();
+    Reference ameliepoulin = Reference.builder().source(poulette).target(ben).tmdbId(194L).build();
+    Reference gb = Reference.builder().source(ben).target(poulette).tmdbId(620L).build();
+    Reference gremlins = Reference.builder().source(paul).target(ben).tmdbId(927L).build();
+    Reference terminator = Reference.builder().source(poulette).target(paul).tmdbId(218L).build();
     
     userRepository.save(ben);
     userRepository.save(paul);

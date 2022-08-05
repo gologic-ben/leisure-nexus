@@ -2,7 +2,11 @@ package com.leisurenexus.web.controller;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Controller;
@@ -16,7 +20,11 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.leisurenexus.api.service.Reference;
 import com.leisurenexus.api.service.User;
+import com.neovisionaries.i18n.LocaleCode;
 
+import io.v47.tmdb.TmdbClient;
+import io.v47.tmdb.api.MovieRequest;
+import io.v47.tmdb.model.MovieDetails;
 import lombok.extern.log4j.Log4j2;
 
 @Controller
@@ -25,6 +33,7 @@ import lombok.extern.log4j.Log4j2;
 public class ReferenceWebController {
 	private @Autowired com.leisurenexus.api.service.ReferenceRepository refRepository;
 	private @Autowired com.leisurenexus.api.service.UserRepository userRepository;
+	private @Autowired TmdbClient tmdbClient;
 
 	/**
 	 * Returns all references from a source
@@ -35,7 +44,7 @@ public class ReferenceWebController {
 	 */
 	@GetMapping("/ref")
 	public String list(@RequestParam(required = true) Long id, Model model) {
-		log.info("Searching references for " + id);
+		log.info("Searching references for source:" + id);
 
 		Optional<User> user = userRepository.findById(id);
 		if (user.isPresent()) {
@@ -43,11 +52,13 @@ public class ReferenceWebController {
 			Reference sourceRefExample = Reference.builder().source(user.get()).build();
 
 			Collection<Reference> sourceReferences = refRepository.findAll(Example.of(sourceRefExample));
+			sourceReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
 			model.addAttribute("sourceReferences", sourceReferences);
 
 			Reference sharedRefExample = Reference.builder().target(user.get()).build();
 			Collection<Reference> targetReferences = refRepository.findAll(Example.of(sharedRefExample));
-
+			targetReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
+			
 			model.addAttribute("targetReferences", targetReferences);
 
 		}
@@ -59,12 +70,12 @@ public class ReferenceWebController {
 	 */
 	@Transactional
 	@GetMapping("/add")
-	public RedirectView add(@RequestParam(required = true) Long sourceId, @RequestParam(required = true) String externalId, Long targetId, RedirectAttributes attributes) {
-		log.info("Add reference " + externalId + " for " + sourceId + " to " + targetId);
+	public RedirectView add(@RequestParam(required = true) Long sourceId, @RequestParam(required = true) Long tmdbId, Long targetId, RedirectAttributes attributes) {
+		log.info("Add reference " + tmdbId + " for " + sourceId + " to " + targetId);
 
 		Optional<User> source = userRepository.findById(sourceId);
 		if (source.isPresent()) {
-			Reference example = Reference.builder().source(source.get()).externalId(externalId).build();
+			Reference example = Reference.builder().source(source.get()).tmdbId(tmdbId).build();
 			
 			Optional<User> target = Optional.empty();
 			if(targetId != null) {
@@ -74,7 +85,7 @@ public class ReferenceWebController {
 			
 			Optional<Reference>  ref = refRepository.findOne(Example.of(example));
 			if(!ref.isPresent()) {
-				log.info("Reference saved" + externalId + " for " + sourceId + " to " + targetId);
+				log.info("Reference saved" + tmdbId + " for " + sourceId + " to " + targetId);
 				refRepository.save(example);
 			}
 		}
@@ -97,6 +108,75 @@ public class ReferenceWebController {
 		}
 		attributes.addAttribute("id", userId);
 		return new RedirectView("ref");
+	}
+	
+	// TODO: Move TMDB client in ReferenceService with save and delete functions to allow Transaction...
+	private void addTMDBMetadata(Reference ref) {
+		log.info("Searching " + ref.getTmdbId() + " in TMDB");
+		
+		MovieDetailsSubscriber subscriber = new MovieDetailsSubscriber(ref);
+		tmdbClient.getMovie().details(ref.getTmdbId().intValue(), LocaleCode.en_CA, MovieRequest.values()).subscribe(subscriber);
+		try {
+			ref = subscriber.get();
+			log.info(ref.getTitle());		
+		} catch (Throwable e) {
+			log.error("An error occured while retrieving reference metadata of " + ref.getId(), e);
+		}
+	}
+	
+	class MovieDetailsSubscriber implements Subscriber<MovieDetails> {
+		private final CountDownLatch latch;
+		private Reference ref;
+		
+		public MovieDetailsSubscriber(Reference ref) {
+			this.latch = new CountDownLatch(1);
+			this.ref = ref;
+		}
+		
+		public Reference get() throws Throwable {
+            return await();
+        }
+		
+		@Override
+		public void onSubscribe(Subscription s) {
+			log.debug("onSubscribe:" + s.toString());
+			s.request(Integer.MAX_VALUE);
+		}
+
+		@Override
+		public void onNext(MovieDetails movie) {
+			log.info("onNext: " + movie);
+			if(movie != null) {
+				ref.setTitle(movie.getTitle());
+				ref.setOverview(movie.getOverview());
+				ref.setPosterPath(movie.getPosterPath());
+				ref.setReleaseDate(movie.getReleaseDate());
+				onComplete();
+			}
+		}
+
+		@Override
+		public void onError(Throwable t) {
+			log.error("An error occured while searching for reference " + ref.getId(), t);
+			onComplete();
+		}
+
+		@Override
+		public void onComplete() {
+			log.info("onComplete");
+			latch.countDown();
+		}
+		
+		 public Reference await() throws Throwable {
+            return await(1, TimeUnit.MINUTES);
+        }
+
+        public Reference await(final long timeout, final TimeUnit unit) throws Throwable {
+            if (!latch.await(timeout, unit)) {
+            	throw new RuntimeException("Publisher onComplete timed out");
+            }
+            return ref;
+        }
 	}
 
 }
