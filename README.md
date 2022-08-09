@@ -79,3 +79,9 @@ Connect your fries as inspiration, share your interests and find new referral so
 * Check image: `docker images`
 * Run in Kubernetes: `kubectl run leisure-nexus --image=leisure-nexus:latest --image-pull-policy=Never --port=8080`
 * Access application with port-forwarding: `kubectl port-forward pods/leisure-nexus 8080:8080`
+
+## TODO
+
+* Connect to a real database
+* Implements ReferenceService
+

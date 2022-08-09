@@ -1,34 +1,42 @@
 package com.leisurenexus.web.controller;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import org.thymeleaf.spring5.context.webflux.ReactiveDataDriverContextVariable;
 
 import com.leisurenexus.api.service.Reference;
 import com.leisurenexus.api.service.User;
 import com.neovisionaries.i18n.LocaleCode;
 
+import io.reactivex.rxjava3.internal.operators.flowable.FlowableMap;
 import io.v47.tmdb.TmdbClient;
 import io.v47.tmdb.api.MovieRequest;
 import io.v47.tmdb.model.MovieDetails;
+import io.v47.tmdb.model.MovieListResult;
+import io.v47.tmdb.model.PaginatedListResults;
 import lombok.extern.log4j.Log4j2;
 
 @Controller
-@RequestMapping("web")
+@RequestMapping("ref")
 @Log4j2
 public class ReferenceWebController {
 	private @Autowired com.leisurenexus.api.service.ReferenceRepository refRepository;
@@ -42,26 +50,24 @@ public class ReferenceWebController {
 	 * @param model
 	 * @return
 	 */
-	@GetMapping("/ref")
-	public String list(@RequestParam(required = true) Long id, Model model) {
-		log.info("Searching references for source:" + id);
+	@GetMapping("")
+	public String list(Model model, @AuthenticationPrincipal OidcUser principal) {
+		User user = retrieveUserFromPrincipal(principal);
+		log.info("Searching references for source:" + user.getId());
+		
+		model.addAttribute("user", user);
+		Reference sourceRefExample = Reference.builder().source(user).build();
 
-		Optional<User> user = userRepository.findById(id);
-		if (user.isPresent()) {
-			model.addAttribute("user", user.get());
-			Reference sourceRefExample = Reference.builder().source(user.get()).build();
+		Collection<Reference> sourceReferences = refRepository.findAll(Example.of(sourceRefExample));
+		sourceReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
+		model.addAttribute("sourceReferences", sourceReferences);
 
-			Collection<Reference> sourceReferences = refRepository.findAll(Example.of(sourceRefExample));
-			sourceReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
-			model.addAttribute("sourceReferences", sourceReferences);
+		Reference sharedRefExample = Reference.builder().target(user).build();
+		Collection<Reference> targetReferences = refRepository.findAll(Example.of(sharedRefExample));
+		targetReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
+		
+		model.addAttribute("targetReferences", targetReferences);
 
-			Reference sharedRefExample = Reference.builder().target(user.get()).build();
-			Collection<Reference> targetReferences = refRepository.findAll(Example.of(sharedRefExample));
-			targetReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
-			
-			model.addAttribute("targetReferences", targetReferences);
-
-		}
 		return "ref";
 	}
 
@@ -70,7 +76,7 @@ public class ReferenceWebController {
 	 */
 	@Transactional
 	@GetMapping("/add")
-	public RedirectView add(@RequestParam(required = true) Long sourceId, @RequestParam(required = true) Long tmdbId, Long targetId, RedirectAttributes attributes) {
+	public RedirectView add(@RequestParam(required = true) Long sourceId, @RequestParam(required = true) Long tmdbId, Long targetId) {
 		log.info("Add reference " + tmdbId + " for " + sourceId + " to " + targetId);
 
 		Optional<User> source = userRepository.findById(sourceId);
@@ -89,9 +95,7 @@ public class ReferenceWebController {
 				refRepository.save(example);
 			}
 		}
-		// redirect
-		attributes.addAttribute("id", sourceId);
-		return new RedirectView("ref");
+		return new RedirectView("");
 	}
 
 	/**
@@ -99,15 +103,59 @@ public class ReferenceWebController {
 	 */
 	@Transactional
 	@GetMapping("/remove")
-	public RedirectView remove(@RequestParam(required = true) Long userId, @RequestParam(required = true) Long referenceId, RedirectAttributes attributes) {
+	public RedirectView remove(@RequestParam(required = true) Long referenceId) {
 		log.info("Removing reference " + referenceId);
 		Optional<Reference> ref = refRepository.findById(referenceId);
 		if (ref.isPresent()) {
 			refRepository.delete(ref.get());
 			
 		}
-		attributes.addAttribute("id", userId);
-		return new RedirectView("ref");
+		return new RedirectView("");
+	}
+	
+	/**
+	 * Search for movies and returns a Movie object
+	 * @param search
+	 * @return
+	 */
+	@GetMapping("/search")
+	public String SearchReferences(Model model, String query) {
+		model.addAttribute("query", query);
+		final List<MovieListResult> results = new ArrayList<>();
+		model.addAttribute("results", new ReactiveDataDriverContextVariable(results, 100));
+		
+		Publisher<PaginatedListResults<MovieListResult>> data = tmdbClient.getSearch().forMovies("Jack+Reacher", null, null, null, null, null, null);
+		log.info(data);
+		model.addAttribute("data", new ReactiveDataDriverContextVariable(data, 100));
+		data.subscribe(new Subscriber<PaginatedListResults<MovieListResult>>() {
+
+			@Override
+			public void onSubscribe(Subscription s) {
+				log.info("onSubscribe");
+				s.request(Integer.MAX_VALUE);
+			}
+
+			@Override
+			public void onNext(PaginatedListResults<MovieListResult> t) {
+				log.info("onNext: " + t);
+				results.addAll(t.getResults());
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				log.info("onError");
+				
+			}
+
+			@Override
+			public void onComplete() {
+				log.info("onComplete");
+				
+			}
+			
+		});
+		log.info("results " + results.size());
+		return "search";
 	}
 	
 	// TODO: Move TMDB client in ReferenceService with save and delete functions to allow Transaction...
@@ -118,10 +166,21 @@ public class ReferenceWebController {
 		tmdbClient.getMovie().details(ref.getTmdbId().intValue(), LocaleCode.en_CA, MovieRequest.values()).subscribe(subscriber);
 		try {
 			ref = subscriber.get();
-			log.info(ref.getTitle());		
+			log.debug("Found movie: " + ref.getTitle());		
 		} catch (Throwable e) {
 			log.error("An error occured while retrieving reference metadata of " + ref.getId(), e);
 		}
+	}
+	
+	// Move this method in UserService class 
+	private User retrieveUserFromPrincipal(OidcUser principal) {
+		log.info(principal);
+		Optional<User> user = userRepository.findByEmail(principal.getEmail());
+		if(user.isEmpty()) {
+			User newOne = userRepository.save(User.builder().email(principal.getEmail()).name(principal.getFullName()).build());
+			return newOne;
+		}
+		return user.get();
 	}
 	
 	class MovieDetailsSubscriber implements Subscriber<MovieDetails> {
@@ -145,7 +204,7 @@ public class ReferenceWebController {
 
 		@Override
 		public void onNext(MovieDetails movie) {
-			log.info("onNext: " + movie);
+			log.debug("onNext: " + movie);
 			if(movie != null) {
 				ref.setTitle(movie.getTitle());
 				ref.setOverview(movie.getOverview());
@@ -163,7 +222,7 @@ public class ReferenceWebController {
 
 		@Override
 		public void onComplete() {
-			log.info("onComplete");
+			log.debug("onComplete");
 			latch.countDown();
 		}
 		

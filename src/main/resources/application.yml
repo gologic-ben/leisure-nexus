@@ -3,6 +3,22 @@ spring:
     show-sql: false # DEBUG JPA/SQL
   datasource:
     url: jdbc:h2:mem:devdb
+  security:
+    oauth2:
+      client:
+        registration:
+          auth0:
+            client-id: ju1vsVRObVJxVAJ5DN3KxaZQ5gyU30Lg
+            client-secret: xxx
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          auth0:
+            # trailing slash is important!
+            issuer-uri: https://dev-fvznszgx.us.auth0.com/
+            
     
 logging.level.root: INFO 
 logging.level.io.v47.tmdb: DEBUG

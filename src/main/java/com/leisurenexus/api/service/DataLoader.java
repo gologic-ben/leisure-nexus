@@ -22,9 +22,9 @@ public class DataLoader implements ApplicationRunner {
   public void run(ApplicationArguments args) {
     log.info("DataLoader::Loading data...");
 
-    User ben = User.builder().name("ben").build();
-    User paul = User.builder().name("paul").build();
-    User poulette = User.builder().name("poulette").build();
+    User ben = User.builder().name("ben").email("benouille@gmail.com").build();
+    User paul = User.builder().name("paul").email("pm.adam@gmail.com").build();
+    User poulette = User.builder().name("poulette").email("annelaurebarbier@gmail.com").build();
     
     Reference jurassic = Reference.builder().source(ben).target(paul).tmdbId(507086L).build();
     Reference titanic = Reference.builder().source(ben).target(paul).tmdbId(597L).build();

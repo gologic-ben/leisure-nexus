@@ -1,0 +1,15 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<p>
+	Query: <span th:text="${query}"></span>
+	Data: <span th:text="${data.page}"></span>
+</p>
+
+<table>
+	<tbody>
+		<tr th:each="item : ${results}">
+			<td th:text="${item.page}">some item...</td>
+		</tr>
+	</tbody>
+</table>
+</html>

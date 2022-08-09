@@ -34,6 +34,9 @@ public class User {
 	@Column(nullable = false)
 	private String name;
 
+	@Column(nullable = false)
+	private String email;
+	
 	@OneToMany(mappedBy = "source")
 	@JsonIgnore
 	private Set<Reference> sources;

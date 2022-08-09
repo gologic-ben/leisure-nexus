@@ -1,0 +1,16 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<body>
+	<div sec:authorize="!isAuthenticated()">
+		<a th:href="@{/oauth2/authorization/auth0}">Log In</a>
+	</div>
+	<div sec:authorize="isAuthenticated()">
+		<img th:src="${currentUser.get('picture')}"
+			th:attr="alt=${currentUser.get('name')}" />
+		<h2 th:text="${currentUser.get('name')}"></h2>
+		<p th:text="${currentUser.get('email')}"></p>
+		<a th:href="@{/ref}">References</a>
+		<a th:href="@{/logout}">Log Out</a>
+	</div>
+</body>
+</html>
