@@ -8,6 +8,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -15,14 +16,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @EntityListeners(AuditListener.class)
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
 @Table(name = "user_logged")
 public class User {
@@ -40,9 +43,9 @@ public class User {
 	@OneToMany(mappedBy = "source")
 	@JsonIgnore
 	private Set<Reference> sources;
-
-	@OneToMany(mappedBy = "target")
+	
+	@ManyToMany(mappedBy = "targets")
 	@JsonIgnore
-	private Set<Reference> targets;
+    Set<Reference> references;
 
 }

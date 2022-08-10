@@ -1,0 +1,23 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<div>
+		<form class="form-inline" th:action="@{/ref}">
+			<label for="searchQuery">Search movie:</label> <input type="text" id="searchQuery" placeholder="Enter search criteria" name="searchQuery" th:value="${searchQuery}">
+			<button type="submit">Submit</button>
+		</form>
+	</div>
+
+	<table>
+		<tbody>
+			<tr th:each="item : ${searchResults?.results}">
+				<td><span th:text="${item.title}"></span> 
+					<a th:href="@{/ref/add(tmdbId=${item.id},searchQuery=${searchQuery})}">Add</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>

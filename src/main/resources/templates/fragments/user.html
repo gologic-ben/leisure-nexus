@@ -1,0 +1,10 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<img th:src="${currentUser.get('picture')}" th:attr="alt=${user.id}" />
+	<h2 th:text="${currentUser.get('name')}"></h2>
+	<a th:href="@{/logout}">Log Out</a>
+</body>
+</html>
