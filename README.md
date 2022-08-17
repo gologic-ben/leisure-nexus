@@ -75,6 +75,8 @@ Connect your fries as inspiration, share your interests and find new referral so
 
 ## How to run
 
+* Local: ./mvnw clean spring-boot:run
+
 * Build image: `docker build --tag leisure-nexus:latest .`
 * Check image: `docker images`
 * Run in Kubernetes: `kubectl run leisure-nexus --image=leisure-nexus:latest --image-pull-policy=Never --port=8080`

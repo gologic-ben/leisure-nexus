@@ -1,4 +1,4 @@
-package com.leisurenexus.api.service;
+package com.leisurenexus.service;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -30,20 +30,16 @@ import lombok.Setter;
 public class Reference {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne
 	@JoinColumn(name = "source_id", nullable = false)
-	User source;
+	Person source;
 
-/*
- 	@JoinColumn(name = "target_id")
-	User target;
-*/
     @ManyToMany
     @JoinTable( name = "reference_target", joinColumns = @JoinColumn(name = "reference_id"), inverseJoinColumns = @JoinColumn(name = "target_id"))
-    Set<User> targets;
+    Set<Person> targets;
 
 	// TMBD movie identifier like 284053
 	private Long tmdbId;
@@ -53,4 +49,5 @@ public class Reference {
 	private @Transient String overview;
 	private @Transient String posterPath;
 	private @Transient LocalDate releaseDate;
+	
 }

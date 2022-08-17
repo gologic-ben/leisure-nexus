@@ -1,4 +1,4 @@
-package com.leisurenexus.api.controller;
+package com.leisurenexus.controller;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -14,25 +14,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.leisurenexus.api.service.Reference;
-import com.leisurenexus.api.service.User;
+import com.leisurenexus.service.Reference;
+import com.leisurenexus.service.Person;
 
 import lombok.extern.log4j.Log4j2;
 
 @RestController
 @RequestMapping("api")
 @Log4j2
-public class ReferenceController {
-	private @Autowired com.leisurenexus.api.service.ReferenceRepository repository;
+public class ReferenceApiController {
+	private @Autowired com.leisurenexus.service.ReferenceRepository repository;
 
 	@GetMapping("/ref")
-	public Collection<Reference> getReferences(@RequestParam(required = false) Long sourceId, @RequestParam(required = false) Long targetId, @RequestParam(required = false) Long tmdbId) {
-		if (sourceId == null && targetId == null && tmdbId == null) {
+	public Collection<Reference> getReferences(@RequestParam(required = false) Long sourceId, @RequestParam(required = false) Long tmdbId) {
+		if (sourceId == null && tmdbId == null) {
 			return Collections.emptyList();
 		}
-		User source = User.builder().id(sourceId).build();
-		User target = User.builder().id(targetId).build();
-		Reference example = Reference.builder().source(source).target(target).tmdbId(tmdbId).build();
+		Person source = Person.builder().id(sourceId).build();
+		Reference example = Reference.builder().source(source).tmdbId(tmdbId).build();
 
 		log.info("Searching references for: " + example);
 
@@ -46,12 +45,11 @@ public class ReferenceController {
 		// TODO: Check if sourceId equals to Authenticated User
 
 		// check if not exist
-		if (getReferences(sourceId, targetId, tmdbId).isEmpty()) {
-			User source = User.builder().id(sourceId).build();
-			User target = User.builder().id(targetId).build();
+		if (getReferences(sourceId, tmdbId).isEmpty()) {
+			Person source = Person.builder().id(sourceId).build();
 			
 			try {
-				Reference add = Reference.builder().source(source).target(target).tmdbId(tmdbId).build();
+				Reference add = Reference.builder().source(source).tmdbId(tmdbId).build();
 				repository.save(add);
 			} catch(RuntimeException e) {
 				log.error("An error occured while saving reference", e);

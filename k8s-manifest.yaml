@@ -1,0 +1,89 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   labels:
+      io.kompose.service: app
+   name: app
+spec:
+   replicas: 1
+   strategy: {}
+   template:
+      metadata:
+         creationTimestamp: null
+         labels:
+            io.kompose.service: app
+      spec:
+         containers:
+         -  env:
+            -  name: SPRING_DATASOURCE_PASSWORD
+               value: postgres
+            -  name: SPRING_DATASOURCE_URL
+               value: jdbc:postgresql://db:5432/db
+            -  name: SPRING_DATASOURCE_USERNAME
+               value: admin
+            image: app
+            name: leisure-nexus-app
+            ports:
+            -  containerPort: 8080
+            resources: {}
+         restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+   labels:
+      io.kompose.service: app
+   name: app
+spec:
+   ports:
+   -  name: '8080'
+      port: 8080
+      targetPort: 8080
+   selector:
+      io.kompose.service: app
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   creationTimestamp: null
+   labels:
+      io.kompose.service: db
+   name: db
+spec:
+   replicas: 1
+   strategy: {}
+   template:
+      metadata:
+         creationTimestamp: null
+         labels:
+            io.kompose.service: db
+      spec:
+         containers:
+         -  env:
+            -  name: POSTGRES_DB
+               value: db
+            -  name: POSTGRES_PASSWORD
+               value: postgres
+            -  name: POSTGRES_USER
+               value: admin
+            image: postgres
+            name: leisure-nexus-db
+            ports:
+            -  containerPort: 5432
+            resources: {}
+         restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+   creationTimestamp: null
+   labels:
+      io.kompose.service: db
+   name: db
+spec:
+   ports:
+   -  name: '5432'
+      port: 5432
+      targetPort: 5432
+   selector:
+      io.kompose.service: db

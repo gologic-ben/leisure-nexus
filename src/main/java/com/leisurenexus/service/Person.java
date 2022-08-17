@@ -1,4 +1,4 @@
-package com.leisurenexus.api.service;
+package com.leisurenexus.service;
 
 import java.util.Set;
 
@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,11 +26,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "user_logged")
-public class User {
+public class Person {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(nullable = false)

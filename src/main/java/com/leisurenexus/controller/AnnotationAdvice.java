@@ -1,4 +1,4 @@
-package com.leisurenexus.web.controller;
+package com.leisurenexus.controller;
 
 import java.util.Collections;
 import java.util.Map;

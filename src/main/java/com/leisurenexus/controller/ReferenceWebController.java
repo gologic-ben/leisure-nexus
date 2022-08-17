@@ -1,9 +1,9 @@
-package com.leisurenexus.web.controller;
+package com.leisurenexus.controller;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.leisurenexus.api.service.Reference;
-import com.leisurenexus.api.service.User;
+import com.leisurenexus.service.Person;
+import com.leisurenexus.service.Reference;
+import com.leisurenexus.service.ReferenceRepository;
+import com.leisurenexus.service.UserRepository;
 import com.neovisionaries.i18n.LocaleCode;
 
 import io.reactivex.rxjava3.internal.operators.flowable.FlowableMap;
@@ -33,8 +35,8 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping("ref")
 @Log4j2
 public class ReferenceWebController {
-	private @Autowired com.leisurenexus.api.service.ReferenceRepository refRepository;
-	private @Autowired com.leisurenexus.api.service.UserRepository userRepository;
+	private @Autowired ReferenceRepository refRepository;
+	private @Autowired UserRepository userRepository;
 	private @Autowired TmdbClient tmdbClient;
 
 	/**
@@ -47,19 +49,22 @@ public class ReferenceWebController {
 	@GetMapping("")
 	public String list(@RequestParam(required = false) String searchQuery, Model model,
 			@AuthenticationPrincipal OidcUser principal) {
-		User user = retrieveUserFromPrincipal(principal);
+		Person user = retrieveUserFromPrincipal(principal);
 		log.info("Searching references for source:" + user.getId());
 
 		model.addAttribute("user", user);
 		Reference sourceRefExample = Reference.builder().source(user).build();
 
 		Collection<Reference> sourceReferences = refRepository.findAll(Example.of(sourceRefExample));
-		sourceReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
+		if (sourceReferences != null) {
+			sourceReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
+		}
 		model.addAttribute("sourceReferences", sourceReferences);
 
 		Collection<Reference> targetReferences = user.getReferences();
-		targetReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
-
+		if (targetReferences != null) {
+			targetReferences.parallelStream().forEach((ref) -> addTMDBMetadata(ref));
+		}
 		model.addAttribute("targetReferences", targetReferences);
 
 		if (searchQuery != null) {
@@ -84,10 +89,10 @@ public class ReferenceWebController {
 	@GetMapping("/add")
 	public RedirectView add(@RequestParam(required = true) Long tmdbId, Long targetId,
 			@AuthenticationPrincipal OidcUser principal) {
-		User user = retrieveUserFromPrincipal(principal);
+		Person user = retrieveUserFromPrincipal(principal);
 		log.info("Add reference " + tmdbId + " for " + user.getId() + " to " + targetId);
 
-		Optional<User> source = userRepository.findById(user.getId());
+		Optional<Person> source = userRepository.findById(user.getId());
 		if (source.isPresent()) {
 			Reference ref = null;
 			Reference example = Reference.builder().source(source.get()).tmdbId(tmdbId).build();
@@ -99,10 +104,10 @@ public class ReferenceWebController {
 				ref = found.get();
 			}
 			if (targetId != null && targetId != user.getId()) {
-				Optional<User> target = userRepository.findById(targetId);
+				Optional<Person> target = userRepository.findById(targetId);
 				if (target.isPresent()) {
 					log.info("Add Reference " + tmdbId + " to target: " + targetId);
-					if(ref.getTargets() == null) {
+					if (ref.getTargets() == null) {
 						ref.setTargets(new HashSet<>());
 					}
 					ref.getTargets().add(target.get());
@@ -126,11 +131,8 @@ public class ReferenceWebController {
 		if (found.isPresent()) {
 			Reference ref = found.get();
 			if (targetId != null) {
-				ref.getTargets().forEach((t) -> {
-					if (t.getId().equals(targetId)) {
-						ref.getTargets().remove(t);
-					}
-				});
+				ref.setTargets(
+						ref.getTargets().stream().filter(v -> !v.getId().equals(targetId)).collect(Collectors.toSet()));
 				refRepository.save(ref);
 			} else {
 				// Remove reference and all targets
@@ -160,12 +162,12 @@ public class ReferenceWebController {
 	}
 
 	// Move this method in UserService class
-	private User retrieveUserFromPrincipal(OidcUser principal) {
+	private Person retrieveUserFromPrincipal(OidcUser principal) {
 		log.info(principal);
-		Optional<User> user = userRepository.findByEmail(principal.getEmail());
+		Optional<Person> user = userRepository.findByEmail(principal.getEmail());
 		if (user.isEmpty()) {
-			User newOne = userRepository
-					.save(User.builder().email(principal.getEmail()).name(principal.getFullName()).build());
+			Person newOne = userRepository
+					.save(Person.builder().email(principal.getEmail()).name(principal.getFullName()).build());
 			return newOne;
 		}
 		return user.get();

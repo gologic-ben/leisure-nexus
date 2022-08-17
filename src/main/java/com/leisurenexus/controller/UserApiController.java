@@ -1,4 +1,4 @@
-package com.leisurenexus.api.controller;
+package com.leisurenexus.controller;
 
 import java.util.Optional;
 
@@ -11,25 +11,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.leisurenexus.api.service.User;
-import com.leisurenexus.api.service.UserNotFoundException;
+import com.leisurenexus.service.Person;
+import com.leisurenexus.service.UserNotFoundException;
 
 import lombok.extern.log4j.Log4j2;
 
 @RestController
 @RequestMapping("api")
 @Log4j2
-public class UserController {
-	private @Autowired com.leisurenexus.api.service.UserRepository userRepository;
+public class UserApiController {
+	private @Autowired com.leisurenexus.service.UserRepository userRepository;
 
 	@GetMapping("/users")
-	public Iterable<User> getUsers() {
+	public Iterable<Person> getUsers() {
 		return userRepository.findAll();
 	}
 
 	@GetMapping("/users/{id}")
-	public User getUser(@PathVariable("id") Long id) throws UserNotFoundException {
-		Optional<User> user = userRepository.findById(id);
+	public Person getUser(@PathVariable("id") Long id) throws UserNotFoundException {
+		Optional<Person> user = userRepository.findById(id);
 		if (user.isPresent()) {
 			return user.get();
 		}
@@ -37,7 +37,7 @@ public class UserController {
 	}
 
 	@PostMapping(path = "/users")
-	public Long addUser(@RequestBody User user) throws UserNotFoundException {
+	public Long addUser(@RequestBody Person user) throws UserNotFoundException {
 		log.info("calling addUser");
 
 		// Filtering attributes
@@ -45,12 +45,12 @@ public class UserController {
 			throw new IllegalArgumentException("name is mandatory");
 		}
 		if (user.getId() != null) {
-			User savedUser = getUser(user.getId());
+			Person savedUser = getUser(user.getId());
 			savedUser.setName(user.getName());
 			userRepository.save(savedUser);
 			return savedUser.getId();
 		} else {
-			User newUser = User.builder().name(user.getName()).build();
+			Person newUser = Person.builder().name(user.getName()).build();
 			userRepository.save(newUser);
 			return newUser.getId();
 		}

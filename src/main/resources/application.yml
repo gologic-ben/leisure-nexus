@@ -1,8 +1,9 @@
+logging.level.root: INFO 
+logging.level.io.v47.tmdb: DEBUG
+#logging.level.org.hibernate.SQL: DEBUG
+#logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
 spring:
-  jpa:
-    show-sql: false # DEBUG JPA/SQL
-  datasource:
-    url: jdbc:h2:mem:devdb
   security:
     oauth2:
       client:
@@ -18,18 +19,17 @@ spring:
           auth0:
             # trailing slash is important!
             issuer-uri: https://dev-fvznszgx.us.auth0.com/
-            
-    
-logging.level.root: INFO 
-logging.level.io.v47.tmdb: DEBUG
-#logging.level.org.hibernate.SQL: DEBUG
-#logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  jpa:
+    show-sql: false # DEBUG JPA/SQL
+    hibernate:
+       ddl-auto: update
+  datasource:
+#    url: jdbc:h2:mem:devdb
+    url: jdbc:postgresql://localhost:5432/db
+    username: admin
+    password: postgres
 
-database:
-   imdb:
-      api-key: k_1216yup9
-   tmdb:
-      api-key: b29cc04446d224df94d186a7918fc788
-
-# apiket for TMBD and this property allow third-party lib to autoconfire tmdbClient
+# apikey for TMBD and this property allow third-party lib to autoconfire tmdbClient
 tmdb-client.api-key: b29cc04446d224df94d186a7918fc788
+# apikey for IMDB (not used for the moment)
+imdb.api-key: k_1216yup9

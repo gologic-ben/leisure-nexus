@@ -19,7 +19,7 @@
 	<p>You referred the following movies</p>
 	<ul>
 		<li th:each="ref: ${sourceReferences}">
-			<em th:text="'Movie ' + ${ref.title}"></em>
+			<em th:text="'Movie ' + ${ref.title} + ' ('+${ref.tmdbId}+')'"></em>
 			<a th:href="@{/ref/remove(referenceId=${ref.id})}">Remove</a>
 			<ol>
 				<li th:each="target: ${ref.targets}">
@@ -33,7 +33,7 @@
 	<p>Your friends have referred you the following movies</p>
 	<ul>
 		<li th:each="ref: ${targetReferences}"><em
-			th:text="'Movie ' + ${ref.title} + ' is referred from ' + ${ref.source.name}"></em>
+			th:text="'Movie ' + ${ref.title} + ' ('+${ref.tmdbId}+')' + ' is referred from ' + ${ref.source.name}"></em>
 			<a th:href="@{/ref/remove(referenceId=${ref.id})}">Remove</a>
 		</li>
 	</ul>
