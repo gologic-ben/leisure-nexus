@@ -67,11 +67,12 @@ public class ReferenceWebController {
 		}
 		model.addAttribute("targetReferences", targetReferences);
 
-		if (searchQuery != null) {
+		if (searchQuery != null && !searchQuery.isEmpty()) {
 			FlowableMap<String, PaginatedListResults<MovieListResult>> data = (FlowableMap<String, PaginatedListResults<MovieListResult>>) tmdbClient
-					.getSearch().forMovies(searchQuery, null, null, null, null, null, null);
+					.getSearch().forMovies(searchQuery, null, LocaleCode.en_US, null, false, null, null);
 			PaginatedListResults<MovieListResult> searchResults = (PaginatedListResults<MovieListResult>) data
 					.blockingFirst();
+			log.info(searchResults);
 			log.info("Found " + searchResults.getTotalResults() + " in " + searchResults.getTotalPages());
 			model.addAttribute("searchQuery", searchQuery);
 			model.addAttribute("searchResults", searchResults);
@@ -87,10 +88,10 @@ public class ReferenceWebController {
 	 */
 	@Transactional
 	@GetMapping("/add")
-	public RedirectView add(@RequestParam(required = true) Long tmdbId, Long targetId,
+	public RedirectView add(@RequestParam(required = true) Long tmdbId, String email,
 			@AuthenticationPrincipal OidcUser principal) {
 		Person user = retrieveUserFromPrincipal(principal);
-		log.info("Add reference " + tmdbId + " for " + user.getId() + " to " + targetId);
+		log.info("Add reference " + tmdbId + " for " + user.getId() + " to " + email);
 
 		Optional<Person> source = userRepository.findById(user.getId());
 		if (source.isPresent()) {
@@ -103,10 +104,10 @@ public class ReferenceWebController {
 			} else {
 				ref = found.get();
 			}
-			if (targetId != null && targetId != user.getId()) {
-				Optional<Person> target = userRepository.findById(targetId);
+			if (email != null && email != user.getEmail()) {
+				Optional<Person> target = userRepository.findByEmail(email);
 				if (target.isPresent()) {
-					log.info("Add Reference " + tmdbId + " to target: " + targetId);
+					log.info("Add Reference " + tmdbId + " to target: " + email);
 					if (ref.getTargets() == null) {
 						ref.setTargets(new HashSet<>());
 					}
@@ -155,7 +156,7 @@ public class ReferenceWebController {
 			ref.setOverview(movie.getOverview());
 			ref.setPosterPath(movie.getPosterPath());
 			ref.setReleaseDate(movie.getReleaseDate());
-			log.debug("Found movie: " + ref.getTitle());
+			log.debug("Found movie: " + ref.getTitle() + " , " + movie.getBackdropPath());
 		} catch (Throwable e) {
 			log.error("An error occured while retrieving reference metadata of " + ref.getId(), e);
 		}

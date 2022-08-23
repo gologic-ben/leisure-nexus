@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeWebController {
 
-    @GetMapping("/")
-    public String home(Model model, @AuthenticationPrincipal OidcUser principal) {
-        return "index";
-    }
+	@GetMapping(value={"", "/", "/home"})
+	public String home(Model model, @AuthenticationPrincipal OidcUser principal) {
+		return "index";
+	}
 }

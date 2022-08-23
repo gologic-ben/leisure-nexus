@@ -1,0 +1,40 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+
+	<div class="container-fluid d-grid gap-3 align-items-center"
+		style="grid-template-columns: 1fr 2fr;">
+		<div class="dropdown">
+			<a th:href="@{/home}"
+				class="d-flex align-items-center col-lg-4 mb-2 mb-lg-0 link-dark text-decoration-none "
+				data-bs-toggle="dropdown" aria-expanded="false"> <img
+				src="/icon.png" width="32" height="32" />
+			</a>
+		</div>
+
+		<div class="d-flex align-items-center">
+			<form class="w-100 me-3" role="search" th:action="@{/ref}">
+				<input type="search" name="searchQuery" th:value="${searchQuery}"
+					class="form-control" placeholder="Search movie..."
+					aria-label="Search">
+			</form>
+
+			<div class="dropdown text-end">
+				<a href="#"
+					class="d-block link-dark text-decoration-none dropdown-toggle"
+					data-bs-toggle="dropdown" aria-expanded="false"> <img
+					th:src="${currentUser.get('picture')}" th:attr="alt=${user.name}"
+					width="32" height="32" class="rounded-circle">
+				</a>
+				<ul class="dropdown-menu text-small">
+					<li><hr class="dropdown-divider"></li>
+					<li><a class="dropdown-item" th:href="@{/logout}">Sign out</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

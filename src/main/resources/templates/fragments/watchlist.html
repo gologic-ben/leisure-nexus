@@ -1,0 +1,28 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+
+	<h5>Your friends have referred you the following movies</h5>
+	<div class="list-group w-auto">
+
+		<div th:each="item: ${targetReferences}"
+			class="list-group-item list-group-item-action d-flex gap-3 py-3"
+			aria-current="true">
+			<img th:src="${item.posterPath}" th:alt="${item.id}" width="32"
+				height="32" class="rounded-circle flex-shrink-0">
+			<div class="d-flex gap-2 w-100 justify-content-between">
+				<div>
+					<h6 class="mb-0" th:text="${item.title}"></h6>
+					<!-- <p class="mb-0 opacity-75" th:text="${item.overview}"></p>  -->
+					<a th:href="@{/ref/remove(referenceId=${item.id})}"
+						class="btn btn-primary btn-sm">Remove</a>					
+				</div>
+				<small class="opacity-50 text-nowrap" th:text="${item.source.name}"></small>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
