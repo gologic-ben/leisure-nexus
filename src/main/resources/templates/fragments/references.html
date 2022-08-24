@@ -10,8 +10,7 @@
 		<div th:each="item: ${sourceReferences}"
 			class="list-group-item list-group-item-action d-flex gap-3 py-3"
 			aria-current="true">
-			<img th:src="${item.posterPath}" th:alt="${item.id}" width="32"
-				height="32" class="rounded-circle flex-shrink-0">
+			<img th:src="@{'https://www.themoviedb.org/t/p/w94_and_h141_bestv2' + ${item.posterPath}}" width="94" height="141" class="flex-shrink-0">
 			<div class="d-flex gap-2 w-100 justify-content-between">
 				<div>
 					<h6 class="mb-0" th:text="${item.title}"></h6>

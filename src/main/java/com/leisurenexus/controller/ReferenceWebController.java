@@ -1,7 +1,9 @@
 package com.leisurenexus.controller;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,14 +23,9 @@ import com.leisurenexus.service.Person;
 import com.leisurenexus.service.Reference;
 import com.leisurenexus.service.ReferenceRepository;
 import com.leisurenexus.service.UserRepository;
-import com.neovisionaries.i18n.LocaleCode;
+import com.leisurenexus.service.tmdb.Movie;
+import com.leisurenexus.service.tmdb.TmdbService;
 
-import io.reactivex.rxjava3.internal.operators.flowable.FlowableMap;
-import io.v47.tmdb.TmdbClient;
-import io.v47.tmdb.api.MovieRequest;
-import io.v47.tmdb.model.MovieDetails;
-import io.v47.tmdb.model.MovieListResult;
-import io.v47.tmdb.model.PaginatedListResults;
 import lombok.extern.log4j.Log4j2;
 
 @Controller
@@ -37,7 +34,7 @@ import lombok.extern.log4j.Log4j2;
 public class ReferenceWebController {
 	private @Autowired ReferenceRepository refRepository;
 	private @Autowired UserRepository userRepository;
-	private @Autowired TmdbClient tmdbClient;
+	private @Autowired TmdbService tmdb;
 
 	/**
 	 * Returns all references from a source
@@ -68,12 +65,7 @@ public class ReferenceWebController {
 		model.addAttribute("targetReferences", targetReferences);
 
 		if (searchQuery != null && !searchQuery.isEmpty()) {
-			FlowableMap<String, PaginatedListResults<MovieListResult>> data = (FlowableMap<String, PaginatedListResults<MovieListResult>>) tmdbClient
-					.getSearch().forMovies(searchQuery, null, LocaleCode.en_US, null, false, null, null);
-			PaginatedListResults<MovieListResult> searchResults = (PaginatedListResults<MovieListResult>) data
-					.blockingFirst();
-			log.info(searchResults);
-			log.info("Found " + searchResults.getTotalResults() + " in " + searchResults.getTotalPages());
+			List<Movie> searchResults = tmdb.search(searchQuery, 1);
 			model.addAttribute("searchQuery", searchQuery);
 			model.addAttribute("searchResults", searchResults);
 		}
@@ -148,18 +140,22 @@ public class ReferenceWebController {
 	private void addTMDBMetadata(Reference ref) {
 		log.info("Searching " + ref.getTmdbId() + " in TMDB");
 
+		
+/*
 		FlowableMap<String, MovieDetails> data = (FlowableMap<String, MovieDetails>) tmdbClient.getMovie()
 				.details(ref.getTmdbId().intValue(), LocaleCode.en_CA, MovieRequest.values());
+*/
 		try {
-			MovieDetails movie = (MovieDetails) data.blockingFirst();
+			Movie movie = tmdb.get(ref.getTmdbId());
 			ref.setTitle(movie.getTitle());
 			ref.setOverview(movie.getOverview());
 			ref.setPosterPath(movie.getPosterPath());
-			ref.setReleaseDate(movie.getReleaseDate());
+			ref.setReleaseDate(LocalDate.parse(movie.getReleaseDate()));
 			log.debug("Found movie: " + ref.getTitle() + " , " + movie.getBackdropPath());
 		} catch (Throwable e) {
 			log.error("An error occured while retrieving reference metadata of " + ref.getId(), e);
 		}
+
 	}
 
 	// Move this method in UserService class
