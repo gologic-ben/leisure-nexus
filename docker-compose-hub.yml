@@ -1,0 +1,23 @@
+version: "3"
+# for each of those services, we will run the docker file associated in the folder
+services:
+  db:
+    image: 'postgres'
+    container_name: leisure-nexus-db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db
+    ports:
+      - "5432:5432"
+  app:
+    image: gologicben/leisure-nexus
+    container_name: leisure-nexus-app
+    depends_on:
+      - "db"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    ports:
+      - "8080:8080"
