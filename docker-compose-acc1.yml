@@ -34,15 +34,15 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=infra
-      - traefik.http.routers.godevopsapi.entrypoints=web
-      - traefik.http.routers.godevopsapi.rule=Host(`leisure-nexus.acc.gologic.ca`)
-      - traefik.http.routers.godevopsapi.middlewares=godevopsapi-redirectregex
-      - traefik.http.routers.godevopsapi-tls.entrypoints=websecure
-      - traefik.http.routers.godevopsapi-tls.tls=true
-      - traefik.http.routers.godevopsapi-tls.tls.certresolver=gologic
-      - traefik.http.routers.godevopsapi-tls.rule=Host(`leisure-nexus.acc.gologic.ca`)
-      - traefik.http.middlewares.godevopsapi-redirectregex.redirectregex.regex=^(http|https)://(.*?)/(.*)
-      - traefik.http.middlewares.godevopsapi-redirectregex.redirectregex.replacement=https://leisure-nexus.acc.gologic.ca/$${3}
+      - traefik.http.routers.leisurenexus.entrypoints=web
+      - traefik.http.routers.leisurenexus.rule=Host(`leisure-nexus.acc.gologic.ca`)
+      - traefik.http.routers.leisurenexus.middlewares=leisurenexus-redirectregex
+      - traefik.http.routers.leisurenexus-tls.entrypoints=websecure
+      - traefik.http.routers.leisurenexus-tls.tls=true
+      - traefik.http.routers.leisurenexus-tls.tls.certresolver=gologic
+      - traefik.http.routers.leisurenexus-tls.rule=Host(`leisure-nexus.acc.gologic.ca`)
+      - traefik.http.middlewares.leisurenexus-redirectregex.redirectregex.regex=^(http|https)://(.*?)/(.*)
+      - traefik.http.middlewares.leisurenexus-redirectregex.redirectregex.replacement=https://leisure-nexus.acc.gologic.ca/$${3}
 
 networks:
   infra:
