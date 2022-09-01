@@ -60,12 +60,12 @@ public class Application {
 	    if( paul.getId() == null) userRepository.save(paul);
 	    if( poulette.getId() == null) userRepository.save(poulette);
 
-	    if(refRepository.findByTmdbId(jurassic.getTmdbId()).isEmpty()) refRepository.save(jurassic);
-	    if(refRepository.findByTmdbId(titanic.getTmdbId()).isEmpty()) refRepository.save(titanic);
-	    if(refRepository.findByTmdbId(ameliepoulin.getTmdbId()).isEmpty()) refRepository.save(ameliepoulin);
-	    if(refRepository.findByTmdbId(gb.getTmdbId()).isEmpty()) refRepository.save(gb);
-	    if(refRepository.findByTmdbId(gremlins.getTmdbId()).isEmpty()) refRepository.save(gremlins);
-	    if(refRepository.findByTmdbId(terminator.getTmdbId()).isEmpty()) refRepository.save(terminator);
+	    if(refRepository.findAllByTmdbId(jurassic.getTmdbId()).isEmpty()) refRepository.save(jurassic);
+	    if(refRepository.findAllByTmdbId(titanic.getTmdbId()).isEmpty()) refRepository.save(titanic);
+	    if(refRepository.findAllByTmdbId(ameliepoulin.getTmdbId()).isEmpty()) refRepository.save(ameliepoulin);
+	    if(refRepository.findAllByTmdbId(gb.getTmdbId()).isEmpty()) refRepository.save(gb);
+	    if(refRepository.findAllByTmdbId(gremlins.getTmdbId()).isEmpty()) refRepository.save(gremlins);
+	    if(refRepository.findAllByTmdbId(terminator.getTmdbId()).isEmpty()) refRepository.save(terminator);
 	    
 	    log.info("DataLoader::Data loaded...");    
     }
